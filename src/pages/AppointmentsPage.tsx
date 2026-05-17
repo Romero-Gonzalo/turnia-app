@@ -3,7 +3,6 @@ import {
   Plus,
   CalendarDays,
   Clock,
-  ChevronDown,
   Search,
   Trash2,
   CheckCircle,
