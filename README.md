@@ -116,6 +116,48 @@ npm run build
 
 ---
 
+## 🔄 Si `git pull` falla por cambios locales
+
+Si Git Bash muestra este error:
+
+```txt
+error: Your local changes to the following files would be overwritten by merge:
+        package.json
+Please commit your changes or stash them before you merge.
+Aborting
+```
+
+significa que tenés cambios locales sin commitear en `package.json` y Git no quiere pisarlos al traer la actualización. Tenés dos caminos:
+
+### Opción recomendada: guardar temporalmente tus cambios
+
+```bash
+git status
+git stash push -m "cambios locales antes de actualizar" -- package.json package-lock.json
+git pull origin master
+git stash pop
+```
+
+Si `git stash pop` genera conflictos, abrí los archivos marcados por Git, dejá una sola versión válida del JSON y después ejecutá:
+
+```bash
+npm install
+git add package.json package-lock.json
+git commit -m "Resolver cambios locales de dependencias"
+```
+
+### Opción rápida: descartar tus cambios locales
+
+Usá esta opción solo si no necesitás conservar lo que modificaste localmente en `package.json` o `package-lock.json`:
+
+```bash
+git restore package.json package-lock.json
+git pull origin master
+npm install
+```
+
+---
+
 ## 🔥 Conexión con Firebase
 
 La base del SDK de Firebase ya está preparada en `src/lib/firebase.ts` y lee las credenciales desde variables de entorno de Vite.
@@ -158,11 +200,48 @@ import { auth, db } from '@/lib/firebase';
 
 ### 4. Publicar reglas de Firestore
 
-Si creaste Firestore en modo producción, pegá el contenido de `firestore.rules` en Firebase Console → Firestore Database → Rules y publicalo.
+Si creaste Firestore en modo producción, primero publicá las reglas del archivo `firestore.rules`. Podés hacerlo desde Firebase Console → Firestore Database → Rules, o desde Git Bash con Firebase CLI:
+
+```bash
+npx firebase-tools login
+npx firebase-tools deploy --only firestore:rules --project tu_project_id
+```
 
 Estas reglas permiten que el primer usuario autenticado cree automáticamente su perfil, su barbería y su membresía, y después limitan `clients`, `services` y `appointments` a miembros de esa barbería.
 
-### 5. Qué crea la app automáticamente
+### 5. Crear documentos iniciales desde Git Bash
+
+La app puede crear los documentos base cuando el usuario inicia sesión, pero también podés inicializar Firestore por consola. Completá `.env.local` con tus credenciales de Firebase y agregá temporalmente el usuario que ya creaste en Firebase Authentication:
+
+```env
+TURNIA_SEED_EMAIL=tu_usuario_auth@example.com
+TURNIA_SEED_PASSWORD=tu_password_auth
+TURNIA_BARBERSHOP_NAME=Mi barbería
+TURNIA_SEED_DEMO_DATA=true
+```
+
+> `TURNIA_SEED_DEMO_DATA=true` crea un cliente y turno demo para que también aparezcan las subcolecciones `clients` y `appointments`. Si no querés datos demo, usá `TURNIA_SEED_DEMO_DATA=false`.
+
+Después ejecutá:
+
+```bash
+npm run seed:firestore
+```
+
+El comando crea o actualiza estos documentos base y agrega servicios iniciales si todavía no hay servicios:
+
+```txt
+/users/{uid}
+/barbershops/{uid}
+/barbershops/{uid}/members/{uid}
+/barbershops/{uid}/services/{serviceId}
+/barbershops/{uid}/clients/cliente-demo          # si TURNIA_SEED_DEMO_DATA=true
+/barbershops/{uid}/appointments/turno-demo      # si TURNIA_SEED_DEMO_DATA=true
+```
+
+> Por seguridad, no commitees `.env.local` ni compartas `TURNIA_SEED_PASSWORD`.
+
+### 6. Qué crea la app automáticamente
 
 Cuando un usuario de Firebase Authentication inicia sesión por primera vez, la app crea estos documentos si todavía no existen:
 
@@ -180,7 +259,7 @@ Después, al cargar clientes, servicios o turnos desde la interfaz, Firestore cr
 /barbershops/{uid}/appointments
 ```
 
-### 6. Próximos pasos
+### 7. Próximos pasos
 
 1. Revisar o extender `AuthContext` si necesitás más datos de perfil:
 
