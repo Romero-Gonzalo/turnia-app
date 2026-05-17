@@ -116,6 +116,48 @@ npm run build
 
 ---
 
+## 🔄 Si `git pull` falla por cambios locales
+
+Si Git Bash muestra este error:
+
+```txt
+error: Your local changes to the following files would be overwritten by merge:
+        package.json
+Please commit your changes or stash them before you merge.
+Aborting
+```
+
+significa que tenés cambios locales sin commitear en `package.json` y Git no quiere pisarlos al traer la actualización. Tenés dos caminos:
+
+### Opción recomendada: guardar temporalmente tus cambios
+
+```bash
+git status
+git stash push -m "cambios locales antes de actualizar" -- package.json package-lock.json
+git pull origin master
+git stash pop
+```
+
+Si `git stash pop` genera conflictos, abrí los archivos marcados por Git, dejá una sola versión válida del JSON y después ejecutá:
+
+```bash
+npm install
+git add package.json package-lock.json
+git commit -m "Resolver cambios locales de dependencias"
+```
+
+### Opción rápida: descartar tus cambios locales
+
+Usá esta opción solo si no necesitás conservar lo que modificaste localmente en `package.json` o `package-lock.json`:
+
+```bash
+git restore package.json package-lock.json
+git pull origin master
+npm install
+```
+
+---
+
 ## 🔥 Conexión con Firebase
 
 La base del SDK de Firebase ya está preparada en `src/lib/firebase.ts` y lee las credenciales desde variables de entorno de Vite.
