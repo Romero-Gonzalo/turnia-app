@@ -19,6 +19,7 @@ interface AppDataContextValue {
   isLoading: boolean;
   // Appointments
   addAppointment: (data: Omit<Appointment, 'id' | 'createdAt' | 'client' | 'service'>) => Promise<void>;
+  updateAppointment: (id: string, data: Partial<Omit<Appointment, 'id' | 'createdAt' | 'client' | 'service'>>) => Promise<void>;
   updateAppointmentStatus: (id: string, status: AppointmentStatus) => Promise<void>;
   deleteAppointment: (id: string) => Promise<void>;
   // Clients
@@ -201,10 +202,24 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
     [getBarbershopId]
   );
 
+  const updateAppointment = useCallback(
+    async (id: string, data: Partial<Omit<Appointment, 'id' | 'createdAt' | 'client' | 'service'>>) => {
+      const barbershopId = getBarbershopId();
+      await updateDoc(doc(db, 'barbershops', barbershopId, 'appointments', id), removeUndefined({
+        clientId: data.clientId,
+        serviceId: data.serviceId,
+        date: data.date,
+        time: data.time,
+        status: data.status,
+        notes: data.notes === undefined ? undefined : data.notes.trim() || deleteField(),
+      }));
+    },
+    [getBarbershopId]
+  );
+
   const updateAppointmentStatus = useCallback(async (id: string, status: AppointmentStatus) => {
-    const barbershopId = getBarbershopId();
-    await updateDoc(doc(db, 'barbershops', barbershopId, 'appointments', id), { status });
-  }, [getBarbershopId]);
+    await updateAppointment(id, { status });
+  }, [updateAppointment]);
 
   const deleteAppointment = useCallback(async (id: string) => {
     const barbershopId = getBarbershopId();
@@ -283,6 +298,7 @@ export function AppDataProvider({ children }: { children: React.ReactNode }) {
         services,
         isLoading,
         addAppointment,
+        updateAppointment,
         updateAppointmentStatus,
         deleteAppointment,
         addClient,

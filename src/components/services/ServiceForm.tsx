@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { useAppData } from '@/context/AppDataContext';
 import { useToast } from '@/context/ToastContext';
@@ -11,19 +11,25 @@ interface ServiceFormProps {
   editingService?: Service | null;
 }
 
+const getInitialForm = (service?: Service | null) => ({
+  name: service?.name ?? '',
+  description: service?.description ?? '',
+  duration: String(service?.duration ?? 30),
+  price: String(service?.price ?? 0),
+  category: service?.category ?? 'corte',
+  active: service?.active ?? true,
+});
+
 export function ServiceForm({ isOpen, onClose, editingService }: ServiceFormProps) {
   const { addService, updateService } = useAppData();
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
-    name: editingService?.name ?? '',
-    description: editingService?.description ?? '',
-    duration: String(editingService?.duration ?? 30),
-    price: String(editingService?.price ?? 0),
-    category: editingService?.category ?? 'corte',
-    active: editingService?.active ?? true,
-  });
+  const [form, setForm] = useState(() => getInitialForm(editingService));
+
+  useEffect(() => {
+    if (isOpen) setForm(getInitialForm(editingService));
+  }, [editingService, isOpen]);
 
   const handleChange = (key: keyof typeof form, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -55,6 +61,7 @@ export function ServiceForm({ isOpen, onClose, editingService }: ServiceFormProp
         showToast('Servicio creado exitosamente.', 'success');
       }
       onClose();
+      setForm(getInitialForm(null));
     } catch (error) {
       console.error('Error saving service', error);
       showToast('No se pudo guardar el servicio.', 'error');

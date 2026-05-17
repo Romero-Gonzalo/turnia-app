@@ -9,6 +9,7 @@ import {
   XCircle,
   PlayCircle,
   Filter,
+  Pencil,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -20,7 +21,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { AppointmentForm } from '@/components/appointments/AppointmentForm';
 import { formatCurrency, formatDuration } from '@/utils';
-import type { AppointmentStatus } from '@/types';
+import type { Appointment, AppointmentStatus } from '@/types';
 
 const STATUS_FILTERS: { label: string; value: AppointmentStatus | 'all' }[] = [
   { label: 'Todos', value: 'all' },
@@ -36,6 +37,7 @@ export function AppointmentsPage() {
   const { showToast } = useToast();
 
   const [showForm, setShowForm] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<AppointmentStatus | 'all'>('all');
   const [dateFilter, setDateFilter] = useState('');
@@ -66,6 +68,16 @@ export function AppointmentsPage() {
       console.error('Error updating appointment status', error);
       showToast('No se pudo actualizar el estado.', 'error');
     }
+  };
+
+  const handleEdit = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingAppointment(null);
   };
 
   const handleDelete = async (id: string) => {
@@ -251,6 +263,13 @@ export function AppointmentsPage() {
                           </button>
                         )}
                         <button
+                          onClick={() => handleEdit(apt)}
+                          className="p-1.5 rounded-md hover:bg-zinc-700 text-zinc-500 hover:text-zinc-200 transition-all"
+                          title="Editar"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => setDeletingId(apt.id)}
                           className="p-1.5 rounded-md hover:bg-red-500/10 text-zinc-500 hover:text-red-400 transition-all"
                           title="Eliminar"
@@ -268,7 +287,11 @@ export function AppointmentsPage() {
       </div>
 
       {/* Modals */}
-      <AppointmentForm isOpen={showForm} onClose={() => setShowForm(false)} />
+      <AppointmentForm
+        isOpen={showForm}
+        onClose={handleCloseForm}
+        editingAppointment={editingAppointment}
+      />
       <ConfirmDialog
         isOpen={!!deletingId}
         onClose={() => setDeletingId(null)}
