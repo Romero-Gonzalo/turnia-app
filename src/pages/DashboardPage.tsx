@@ -6,11 +6,10 @@ import {
   DollarSign,
   Clock,
   CheckCircle,
-  XCircle,
   ArrowRight,
   TrendingUp,
 } from 'lucide-react';
-import { format, isToday } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useAppData } from '@/context/AppDataContext';
 import { useAuth } from '@/context/AuthContext';
@@ -181,10 +180,10 @@ export function DashboardPage() {
             </div>
             <div className="space-y-3">
               {[
-                { label: 'Completados', value: stats.completed, color: 'bg-emerald-400', Icon: CheckCircle },
-                { label: 'Pendientes', value: stats.pending, color: 'bg-amber-400', Icon: Clock },
-                { label: 'Cancelados', value: stats.cancelled, color: 'bg-red-400', Icon: XCircle },
-              ].map(({ label, value, color, Icon }) => (
+                { label: 'Completados', value: stats.completed, color: 'bg-emerald-400' },
+                { label: 'Pendientes', value: stats.pending, color: 'bg-amber-400' },
+                { label: 'Cancelados', value: stats.cancelled, color: 'bg-red-400' },
+              ].map(({ label, value, color }) => (
                 <div key={label} className="flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <div className={`w-2 h-2 rounded-full ${color}`} />

@@ -116,46 +116,64 @@ npm run build
 
 ---
 
-## 🔥 Conexión con Firebase (siguiente paso)
+## 🔥 Conexión con Firebase
 
-1. Instalar Firebase:
+La base del SDK de Firebase ya está preparada en `src/lib/firebase.ts` y lee las credenciales desde variables de entorno de Vite.
+
+### 1. Instalar dependencias
 
 ```bash
-npm install firebase
+npm install
 ```
 
-2. Crear `src/lib/firebase.ts`:
+> Si `package-lock.json` no incluye Firebase todavía, ejecutá `npm install firebase` una vez y commiteá el lock actualizado.
+
+### 2. Crear `.env.local`
+
+Copiá `.env.example` a `.env.local` y reemplazá los valores con la configuración de tu Web App de Firebase:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+VITE_FIREBASE_API_KEY=tu_api_key
+VITE_FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=tu_proyecto
+VITE_FIREBASE_STORAGE_BUCKET=tu_proyecto.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=tu_messaging_sender_id
+VITE_FIREBASE_APP_ID=tu_app_id
+```
+
+> Importante: el archivo debe llamarse `.env.local` con punto inicial. `env.local` no lo carga Vite automáticamente.
+
+### 3. Servicios inicializados
+
+Usá estos exports cuando migremos autenticación y datos:
 
 ```typescript
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  // ...
-};
-
-export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+import { auth, db } from '@/lib/firebase';
 ```
 
-3. Reemplazar `AuthContext` con Firebase Auth:
+### 4. Próximos pasos
+
+1. Reemplazar `AuthContext` con Firebase Auth:
 
 ```typescript
 // Cambiar login() para usar signInWithEmailAndPassword(auth, email, password)
 // Cambiar logout() para usar signOut(auth)
+// Escuchar sesión con onAuthStateChanged(auth, callback)
 ```
 
-4. Reemplazar datos mockeados con Firestore:
+2. Reemplazar datos mockeados con Firestore:
 
 ```typescript
-// En AppDataContext: usar onSnapshot() para tiempo real
-// Colecciones: /appointments, /clients, /services
-// Reglas de seguridad por uid de usuario
+// En AppDataContext: usar getDocs/onSnapshot según convenga
+// Colecciones sugeridas:
+// /barbershops/{barbershopId}/appointments
+// /barbershops/{barbershopId}/clients
+// /barbershops/{barbershopId}/services
+// Reglas de seguridad por uid de usuario y membresía de barbería
 ```
 
 ---
