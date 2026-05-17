@@ -3,11 +3,10 @@ import { Navigate } from 'react-router-dom';
 import { Scissors, Eye, EyeOff, ArrowRight, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { Spinner } from '@/components/ui/Spinner';
-import { MOCK_CREDENTIALS } from '@/data/mockData';
 
 export function LoginPage() {
   const { isAuthenticated, login, isLoading } = useAuth();
-  const [email, setEmail] = useState(MOCK_CREDENTIALS.email);
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
@@ -51,13 +50,12 @@ export function LoginPage() {
             <p className="text-sm text-zinc-500 mt-1">Bienvenido de nuevo</p>
           </div>
 
-          {/* Demo hint */}
+          {/* Firebase hint */}
           <div className="mb-6 p-3.5 rounded-lg bg-amber-500/5 border border-amber-500/20 flex gap-3 items-start">
             <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
             <div className="text-xs text-zinc-400 leading-relaxed">
-              <span className="text-amber-400 font-semibold">Demo:</span>{' '}
-              <span className="font-mono">{MOCK_CREDENTIALS.email}</span> /{' '}
-              <span className="font-mono">{MOCK_CREDENTIALS.password}</span>
+              <span className="text-amber-400 font-semibold">Firebase:</span>{' '}
+              ingresá con el usuario que creaste en Authentication.
             </div>
           </div>
 

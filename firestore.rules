@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnUser(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function isBarbershopMember(barbershopId) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/barbershops/$(barbershopId)/members/$(request.auth.uid));
+    }
+
+    match /users/{uid} {
+      allow read, create, update: if isOwnUser(uid);
+      allow delete: if false;
+    }
+
+    match /barbershops/{barbershopId} {
+      allow create: if signedIn() && barbershopId == request.auth.uid;
+      allow read, update, delete: if isBarbershopMember(barbershopId);
+
+      match /members/{uid} {
+        allow create: if signedIn() && barbershopId == request.auth.uid && uid == request.auth.uid;
+        allow read, update, delete: if isBarbershopMember(barbershopId);
+      }
+
+      match /clients/{clientId} {
+        allow read, write: if isBarbershopMember(barbershopId);
+      }
+
+      match /services/{serviceId} {
+        allow read, write: if isBarbershopMember(barbershopId);
+      }
+
+      match /appointments/{appointmentId} {
+        allow read, write: if isBarbershopMember(barbershopId);
+      }
+    }
+  }
+}
