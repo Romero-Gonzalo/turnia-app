@@ -34,17 +34,22 @@ export function ClientForm({ isOpen, onClose, editingClient }: ClientFormProps) 
       return;
     }
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 500));
 
-    if (editingClient) {
-      updateClient(editingClient.id, form);
-      showToast('Cliente actualizado.', 'success');
-    } else {
-      addClient(form);
-      showToast('Cliente registrado exitosamente.', 'success');
+    try {
+      if (editingClient) {
+        await updateClient(editingClient.id, form);
+        showToast('Cliente actualizado.', 'success');
+      } else {
+        await addClient(form);
+        showToast('Cliente registrado exitosamente.', 'success');
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error saving client', error);
+      showToast('No se pudo guardar el cliente.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
-    onClose();
   };
 
   return (

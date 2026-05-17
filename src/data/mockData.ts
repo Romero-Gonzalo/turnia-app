@@ -8,6 +8,7 @@ export const MOCK_USER: User = {
   name: 'Matías Romero',
   email: 'matias@turnia.app',
   role: 'admin',
+  barbershopId: 'barbershop-001',
   barbershopName: 'Barber & Co.',
 };
 

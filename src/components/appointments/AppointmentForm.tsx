@@ -37,19 +37,25 @@ export function AppointmentForm({ isOpen, onClose, editingAppointment }: Appoint
       return;
     }
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 600));
-    addAppointment({
-      clientId: form.clientId,
-      serviceId: form.serviceId,
-      date: form.date,
-      time: form.time,
-      notes: form.notes,
-      status: form.status,
-    });
-    showToast('Turno creado exitosamente.', 'success');
-    setIsSubmitting(false);
-    onClose();
-    setForm({ clientId: '', serviceId: '', date: format(new Date(), 'yyyy-MM-dd'), time: '09:00', notes: '', status: 'pending' });
+
+    try {
+      await addAppointment({
+        clientId: form.clientId,
+        serviceId: form.serviceId,
+        date: form.date,
+        time: form.time,
+        notes: form.notes,
+        status: form.status,
+      });
+      showToast('Turno creado exitosamente.', 'success');
+      onClose();
+      setForm({ clientId: '', serviceId: '', date: format(new Date(), 'yyyy-MM-dd'), time: '09:00', notes: '', status: 'pending' });
+    } catch (error) {
+      console.error('Error saving appointment', error);
+      showToast('No se pudo guardar el turno.', 'error');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

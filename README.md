@@ -155,9 +155,34 @@ Usá estos exports cuando migremos autenticación y datos:
 import { auth, db } from '@/lib/firebase';
 ```
 
-### 4. Próximos pasos
 
-1. Reemplazar `AuthContext` con Firebase Auth:
+### 4. Publicar reglas de Firestore
+
+Si creaste Firestore en modo producción, pegá el contenido de `firestore.rules` en Firebase Console → Firestore Database → Rules y publicalo.
+
+Estas reglas permiten que el primer usuario autenticado cree automáticamente su perfil, su barbería y su membresía, y después limitan `clients`, `services` y `appointments` a miembros de esa barbería.
+
+### 5. Qué crea la app automáticamente
+
+Cuando un usuario de Firebase Authentication inicia sesión por primera vez, la app crea estos documentos si todavía no existen:
+
+```txt
+/users/{uid}
+/barbershops/{uid}
+/barbershops/{uid}/members/{uid}
+```
+
+Después, al cargar clientes, servicios o turnos desde la interfaz, Firestore crea estas subcolecciones:
+
+```txt
+/barbershops/{uid}/clients
+/barbershops/{uid}/services
+/barbershops/{uid}/appointments
+```
+
+### 6. Próximos pasos
+
+1. Revisar o extender `AuthContext` si necesitás más datos de perfil:
 
 ```typescript
 // Cambiar login() para usar signInWithEmailAndPassword(auth, email, password)
@@ -165,7 +190,7 @@ import { auth, db } from '@/lib/firebase';
 // Escuchar sesión con onAuthStateChanged(auth, callback)
 ```
 
-2. Reemplazar datos mockeados con Firestore:
+2. Extender Firestore si necesitás seed por consola o datos iniciales:
 
 ```typescript
 // En AppDataContext: usar getDocs/onSnapshot según convenga
