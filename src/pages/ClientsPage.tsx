@@ -41,10 +41,15 @@ export function ClientsPage() {
     [clients, search]
   );
 
-  const handleDelete = (id: string) => {
-    deleteClient(id);
-    showToast('Cliente eliminado.', 'info');
-    setDeletingId(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteClient(id);
+      showToast('Cliente eliminado.', 'info');
+      setDeletingId(null);
+    } catch (error) {
+      console.error('Error deleting client', error);
+      showToast('No se pudo eliminar el cliente.', 'error');
+    }
   };
 
   const handleEdit = (client: Client) => {

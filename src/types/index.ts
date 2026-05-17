@@ -6,6 +6,7 @@ export interface User {
   email: string;
   role: 'admin' | 'barber';
   avatar?: string;
+  barbershopId: string;
   barbershopName: string;
 }
 

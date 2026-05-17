@@ -116,46 +116,89 @@ npm run build
 
 ---
 
-## 🔥 Conexión con Firebase (siguiente paso)
+## 🔥 Conexión con Firebase
 
-1. Instalar Firebase:
+La base del SDK de Firebase ya está preparada en `src/lib/firebase.ts` y lee las credenciales desde variables de entorno de Vite.
+
+### 1. Instalar dependencias
 
 ```bash
-npm install firebase
+npm install
 ```
 
-2. Crear `src/lib/firebase.ts`:
+> Si `package-lock.json` no incluye Firebase todavía, ejecutá `npm install firebase` una vez y commiteá el lock actualizado.
+
+### 2. Crear `.env.local`
+
+Copiá `.env.example` a `.env.local` y reemplazá los valores con la configuración de tu Web App de Firebase:
+
+```bash
+cp .env.example .env.local
+```
+
+```env
+VITE_FIREBASE_API_KEY=tu_api_key
+VITE_FIREBASE_AUTH_DOMAIN=tu_proyecto.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=tu_proyecto
+VITE_FIREBASE_STORAGE_BUCKET=tu_proyecto.firebasestorage.app
+VITE_FIREBASE_MESSAGING_SENDER_ID=tu_messaging_sender_id
+VITE_FIREBASE_APP_ID=tu_app_id
+```
+
+> Importante: el archivo debe llamarse `.env.local` con punto inicial. `env.local` no lo carga Vite automáticamente.
+
+### 3. Servicios inicializados
+
+Usá estos exports cuando migremos autenticación y datos:
 
 ```typescript
-import { initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  // ...
-};
-
-export const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+import { auth, db } from '@/lib/firebase';
 ```
 
-3. Reemplazar `AuthContext` con Firebase Auth:
+
+### 4. Publicar reglas de Firestore
+
+Si creaste Firestore en modo producción, pegá el contenido de `firestore.rules` en Firebase Console → Firestore Database → Rules y publicalo.
+
+Estas reglas permiten que el primer usuario autenticado cree automáticamente su perfil, su barbería y su membresía, y después limitan `clients`, `services` y `appointments` a miembros de esa barbería.
+
+### 5. Qué crea la app automáticamente
+
+Cuando un usuario de Firebase Authentication inicia sesión por primera vez, la app crea estos documentos si todavía no existen:
+
+```txt
+/users/{uid}
+/barbershops/{uid}
+/barbershops/{uid}/members/{uid}
+```
+
+Después, al cargar clientes, servicios o turnos desde la interfaz, Firestore crea estas subcolecciones:
+
+```txt
+/barbershops/{uid}/clients
+/barbershops/{uid}/services
+/barbershops/{uid}/appointments
+```
+
+### 6. Próximos pasos
+
+1. Revisar o extender `AuthContext` si necesitás más datos de perfil:
 
 ```typescript
 // Cambiar login() para usar signInWithEmailAndPassword(auth, email, password)
 // Cambiar logout() para usar signOut(auth)
+// Escuchar sesión con onAuthStateChanged(auth, callback)
 ```
 
-4. Reemplazar datos mockeados con Firestore:
+2. Extender Firestore si necesitás seed por consola o datos iniciales:
 
 ```typescript
-// En AppDataContext: usar onSnapshot() para tiempo real
-// Colecciones: /appointments, /clients, /services
-// Reglas de seguridad por uid de usuario
+// En AppDataContext: usar getDocs/onSnapshot según convenga
+// Colecciones sugeridas:
+// /barbershops/{barbershopId}/appointments
+// /barbershops/{barbershopId}/clients
+// /barbershops/{barbershopId}/services
+// Reglas de seguridad por uid de usuario y membresía de barbería
 ```
 
 ---

@@ -36,7 +36,6 @@ export function ServiceForm({ isOpen, onClose, editingService }: ServiceFormProp
       return;
     }
     setIsSubmitting(true);
-    await new Promise((r) => setTimeout(r, 500));
 
     const data = {
       name: form.name,
@@ -47,15 +46,21 @@ export function ServiceForm({ isOpen, onClose, editingService }: ServiceFormProp
       active: form.active,
     };
 
-    if (editingService) {
-      updateService(editingService.id, data);
-      showToast('Servicio actualizado.', 'success');
-    } else {
-      addService(data);
-      showToast('Servicio creado exitosamente.', 'success');
+    try {
+      if (editingService) {
+        await updateService(editingService.id, data);
+        showToast('Servicio actualizado.', 'success');
+      } else {
+        await addService(data);
+        showToast('Servicio creado exitosamente.', 'success');
+      }
+      onClose();
+    } catch (error) {
+      console.error('Error saving service', error);
+      showToast('No se pudo guardar el servicio.', 'error');
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
-    onClose();
   };
 
   return (

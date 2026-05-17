@@ -3,7 +3,6 @@ import {
   Plus,
   CalendarDays,
   Clock,
-  ChevronDown,
   Search,
   Trash2,
   CheckCircle,
@@ -59,15 +58,25 @@ export function AppointmentsPage() {
       });
   }, [appointments, search, statusFilter, dateFilter]);
 
-  const handleStatusChange = (id: string, status: AppointmentStatus) => {
-    updateAppointmentStatus(id, status);
-    showToast(`Estado actualizado a "${status === 'completed' ? 'Completado' : status === 'cancelled' ? 'Cancelado' : 'En curso'}"`, 'success');
+  const handleStatusChange = async (id: string, status: AppointmentStatus) => {
+    try {
+      await updateAppointmentStatus(id, status);
+      showToast(`Estado actualizado a "${status === 'completed' ? 'Completado' : status === 'cancelled' ? 'Cancelado' : 'En curso'}"`, 'success');
+    } catch (error) {
+      console.error('Error updating appointment status', error);
+      showToast('No se pudo actualizar el estado.', 'error');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteAppointment(id);
-    showToast('Turno eliminado.', 'info');
-    setDeletingId(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteAppointment(id);
+      showToast('Turno eliminado.', 'info');
+      setDeletingId(null);
+    } catch (error) {
+      console.error('Error deleting appointment', error);
+      showToast('No se pudo eliminar el turno.', 'error');
+    }
   };
 
   return (

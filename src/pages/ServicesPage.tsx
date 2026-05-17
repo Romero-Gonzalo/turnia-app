@@ -40,15 +40,25 @@ export function ServicesPage() {
 
   const activeCount = services.filter((s) => s.active).length;
 
-  const handleToggle = (id: string, active: boolean) => {
-    toggleServiceActive(id);
-    showToast(active ? 'Servicio desactivado.' : 'Servicio activado.', 'info');
+  const handleToggle = async (id: string, active: boolean) => {
+    try {
+      await toggleServiceActive(id);
+      showToast(active ? 'Servicio desactivado.' : 'Servicio activado.', 'info');
+    } catch (error) {
+      console.error('Error toggling service', error);
+      showToast('No se pudo actualizar el servicio.', 'error');
+    }
   };
 
-  const handleDelete = (id: string) => {
-    deleteService(id);
-    showToast('Servicio eliminado.', 'info');
-    setDeletingId(null);
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteService(id);
+      showToast('Servicio eliminado.', 'info');
+      setDeletingId(null);
+    } catch (error) {
+      console.error('Error deleting service', error);
+      showToast('No se pudo eliminar el servicio.', 'error');
+    }
   };
 
   const handleEdit = (service: Service) => {
