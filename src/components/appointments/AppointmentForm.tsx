@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { useAppData } from '@/context/AppDataContext';
 import { useToast } from '@/context/ToastContext';
@@ -12,19 +12,25 @@ interface AppointmentFormProps {
   editingAppointment?: Appointment | null;
 }
 
+const getInitialForm = (appointment?: Appointment | null) => ({
+  clientId: appointment?.clientId ?? '',
+  serviceId: appointment?.serviceId ?? '',
+  date: appointment?.date ?? format(new Date(), 'yyyy-MM-dd'),
+  time: appointment?.time ?? '09:00',
+  notes: appointment?.notes ?? '',
+  status: (appointment?.status ?? 'pending') as AppointmentStatus,
+});
+
 export function AppointmentForm({ isOpen, onClose, editingAppointment }: AppointmentFormProps) {
-  const { clients, services, addAppointment } = useAppData();
+  const { clients, services, addAppointment, updateAppointment } = useAppData();
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
-    clientId: editingAppointment?.clientId ?? '',
-    serviceId: editingAppointment?.serviceId ?? '',
-    date: editingAppointment?.date ?? format(new Date(), 'yyyy-MM-dd'),
-    time: editingAppointment?.time ?? '09:00',
-    notes: editingAppointment?.notes ?? '',
-    status: (editingAppointment?.status ?? 'pending') as AppointmentStatus,
-  });
+  const [form, setForm] = useState(() => getInitialForm(editingAppointment));
+
+  useEffect(() => {
+    if (isOpen) setForm(getInitialForm(editingAppointment));
+  }, [editingAppointment, isOpen]);
 
   const handleChange = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -39,17 +45,25 @@ export function AppointmentForm({ isOpen, onClose, editingAppointment }: Appoint
     setIsSubmitting(true);
 
     try {
-      await addAppointment({
+      const payload = {
         clientId: form.clientId,
         serviceId: form.serviceId,
         date: form.date,
         time: form.time,
         notes: form.notes,
         status: form.status,
-      });
-      showToast('Turno creado exitosamente.', 'success');
+      };
+
+      if (editingAppointment) {
+        await updateAppointment(editingAppointment.id, payload);
+        showToast('Turno actualizado.', 'success');
+      } else {
+        await addAppointment(payload);
+        showToast('Turno creado exitosamente.', 'success');
+      }
+
       onClose();
-      setForm({ clientId: '', serviceId: '', date: format(new Date(), 'yyyy-MM-dd'), time: '09:00', notes: '', status: 'pending' });
+      setForm(getInitialForm(null));
     } catch (error) {
       console.error('Error saving appointment', error);
       showToast('No se pudo guardar el turno.', 'error');
@@ -167,7 +181,7 @@ export function AppointmentForm({ isOpen, onClose, editingAppointment }: Appoint
             Cancelar
           </button>
           <button type="submit" disabled={isSubmitting} className="btn-primary">
-            {isSubmitting ? <><Spinner size="sm" /> Guardando...</> : 'Guardar turno'}
+            {isSubmitting ? <><Spinner size="sm" /> Guardando...</> : editingAppointment ? 'Actualizar turno' : 'Guardar turno'}
           </button>
         </div>
       </form>

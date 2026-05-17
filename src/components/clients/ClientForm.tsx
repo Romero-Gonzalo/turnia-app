@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { useAppData } from '@/context/AppDataContext';
 import { useToast } from '@/context/ToastContext';
@@ -11,17 +11,23 @@ interface ClientFormProps {
   editingClient?: Client | null;
 }
 
+const getInitialForm = (client?: Client | null) => ({
+  name: client?.name ?? '',
+  phone: client?.phone ?? '',
+  email: client?.email ?? '',
+  notes: client?.notes ?? '',
+});
+
 export function ClientForm({ isOpen, onClose, editingClient }: ClientFormProps) {
   const { addClient, updateClient } = useAppData();
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
-    name: editingClient?.name ?? '',
-    phone: editingClient?.phone ?? '',
-    email: editingClient?.email ?? '',
-    notes: editingClient?.notes ?? '',
-  });
+  const [form, setForm] = useState(() => getInitialForm(editingClient));
+
+  useEffect(() => {
+    if (isOpen) setForm(getInitialForm(editingClient));
+  }, [editingClient, isOpen]);
 
   const handleChange = (key: keyof typeof form, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -44,6 +50,7 @@ export function ClientForm({ isOpen, onClose, editingClient }: ClientFormProps) 
         showToast('Cliente registrado exitosamente.', 'success');
       }
       onClose();
+      setForm(getInitialForm(null));
     } catch (error) {
       console.error('Error saving client', error);
       showToast('No se pudo guardar el cliente.', 'error');
