@@ -13,8 +13,6 @@ interface ClientFormProps {
 
 const getInitialForm = (client?: Client | null) => ({
   name: client?.name ?? '',
-  phone: client?.phone ?? '',
-  email: client?.email ?? '',
   notes: client?.notes ?? '',
 });
 
@@ -35,8 +33,8 @@ export function ClientForm({ isOpen, onClose, editingClient }: ClientFormProps) 
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!form.name || !form.phone) {
-      showToast('Nombre y teléfono son requeridos.', 'error');
+    if (!form.name) {
+      showToast('El nombre es requerido.', 'error');
       return;
     }
     setIsSubmitting(true);
@@ -75,26 +73,6 @@ export function ClientForm({ isOpen, onClose, editingClient }: ClientFormProps) 
             placeholder="Nombre completo"
             className="input-base"
             required
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Teléfono *</label>
-          <input
-            value={form.phone}
-            onChange={(e) => handleChange('phone', e.target.value)}
-            placeholder="+54 9 11 ..."
-            className="input-base"
-            required
-          />
-        </div>
-        <div className="space-y-1.5">
-          <label className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">Email</label>
-          <input
-            type="email"
-            value={form.email}
-            onChange={(e) => handleChange('email', e.target.value)}
-            placeholder="cliente@email.com"
-            className="input-base"
           />
         </div>
         <div className="space-y-1.5">

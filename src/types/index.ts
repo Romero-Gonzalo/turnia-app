@@ -15,7 +15,7 @@ export interface User {
 export interface Client {
   id: string;
   name: string;
-  phone: string;
+  phone?: string;
   email?: string;
   totalVisits: number;
   lastVisit?: string;
