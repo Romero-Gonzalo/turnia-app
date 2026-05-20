@@ -56,7 +56,7 @@ function mapClient(id: string, data: Record<string, unknown>): Client {
   return {
     id,
     name: String(data.name ?? ''),
-    phone: String(data.phone ?? ''),
+    phone: typeof data.phone === 'string' ? data.phone : undefined,
     email: typeof data.email === 'string' ? data.email : undefined,
     totalVisits: Number(data.totalVisits ?? 0),
     lastVisit: typeof data.lastVisit === 'string' ? data.lastVisit : undefined,

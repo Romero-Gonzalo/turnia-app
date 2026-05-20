@@ -4,7 +4,6 @@ import {
   Users,
   Search,
   Phone,
-  Mail,
   Calendar,
   Pencil,
   Trash2,
@@ -35,8 +34,7 @@ export function ClientsPage() {
         (c) =>
           !search ||
           c.name.toLowerCase().includes(search.toLowerCase()) ||
-          c.phone.includes(search) ||
-          c.email?.toLowerCase().includes(search.toLowerCase())
+          c.phone?.includes(search)
       ),
     [clients, search]
   );
@@ -82,7 +80,7 @@ export function ClientsPage() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre, teléfono o email..."
+            placeholder="Buscar por nombre o teléfono..."
             className="bg-transparent text-sm text-zinc-300 placeholder-zinc-600 outline-none w-full"
           />
         </div>
@@ -178,17 +176,13 @@ function ClientCard({ client, onEdit, onDelete }: ClientCardProps) {
 
       {/* Info */}
       <div className="space-y-2">
-        <div className="flex items-center gap-2 text-sm text-zinc-400">
-          <Phone className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
-          <span className="font-mono text-xs">{client.phone}</span>
-        </div>
-        {client.email && (
+        {client.phone && (
           <div className="flex items-center gap-2 text-sm text-zinc-400">
-            <Mail className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
-            <span className="text-xs truncate">{client.email}</span>
+            <Phone className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
+            <span className="font-mono text-xs">{client.phone}</span>
           </div>
         )}
-        {client.lastVisit && (
+       {client.lastVisit && (
           <div className="flex items-center gap-2 text-sm text-zinc-400">
             <Calendar className="w-3.5 h-3.5 text-zinc-600 flex-shrink-0" />
             <span className="text-xs text-zinc-500">
